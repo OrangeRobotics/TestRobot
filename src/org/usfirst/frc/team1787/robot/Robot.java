@@ -17,9 +17,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
  */
 public class Robot extends IterativeRobot {
 
-	private DifferentialDrive drive;
-	
-	private WPI_TalonSRX frontRight, frontLeft, rearRight, rearLeft;
+	private DriveTrain drive;
 	
 	Joystick rightStick, leftStick;
 	
@@ -31,23 +29,12 @@ public class Robot extends IterativeRobot {
 	public void robotInit() {
 		//Robot is inializing
 		
-		//Initialize talons
-		frontRight = new WPI_TalonSRX(8);
-		frontLeft = new WPI_TalonSRX(6);
-		frontLeft.setInverted(true);
+		//Create drive train
+		drive = new DriveTrain(8, 9, 6, 7);
 		
-		rearRight = new WPI_TalonSRX(9);
-		rearRight.follow(frontRight);
-		
-		rearLeft = new WPI_TalonSRX(7);
-		rearLeft.setInverted(true);
-		rearLeft.follow(frontLeft);
-		
-		drive = new DifferentialDrive(frontLeft, frontRight);
-		
-		//Control the robot
-		this.rightStick = new Joystick(0);
-		this.leftStick = new Joystick(1);
+		//Get joysticks
+		rightStick = new Joystick(0);
+		leftStick = new Joystick(1);
 
 		//Done!
 		System.out.println("Robot init :)");
@@ -58,9 +45,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopPeriodic() {
-		//Use arcade controls
-		drive.arcadeDrive(rightStick.getY(), -rightStick.getX());
-		
+		drive.drive(-rightStick.getY(),rightStick.getX());
 	}
 	
 	

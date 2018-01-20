@@ -22,13 +22,6 @@ public class Robot extends IterativeRobot {
 	private WPI_TalonSRX frontRight, frontLeft, rearRight, rearLeft;
 	
 	Joystick rightStick, leftStick;
-
-	Compressor compressor;
-	
-	Solenoid solenoid1;
-	Solenoid solenoid2;
-	
-	PneumaticCylinder cylinder;
 	
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -41,22 +34,16 @@ public class Robot extends IterativeRobot {
 		//Initialize talons
 		frontRight = new WPI_TalonSRX(8);
 		frontLeft = new WPI_TalonSRX(6);
+		frontLeft.setInverted(true);
+		
 		rearRight = new WPI_TalonSRX(9);
+		rearRight.follow(frontRight);
+		
 		rearLeft = new WPI_TalonSRX(7);
+		rearLeft.setInverted(true);
+		rearLeft.follow(frontLeft);
 		
-		//Get the compressor (PCM)
-		compressor = new Compressor(0);
-		
-		compressor.stop();
-		
-		cylinder = new PneumaticCylinder(0, 1);
-		
-		solenoid1 = new Solenoid(0);
-		
-//		compressor.setClosedLoopControl(fal);
-		
-		//Drive the robot
-		this.drive = new DifferentialDrive(new SpeedControllerGroup(frontLeft, rearLeft), new SpeedControllerGroup(frontRight, rearRight));
+		drive = new DifferentialDrive(frontLeft, frontRight);
 		
 		//Control the robot
 		this.rightStick = new Joystick(0);
@@ -74,28 +61,13 @@ public class Robot extends IterativeRobot {
 		//Use arcade controls
 		drive.arcadeDrive(rightStick.getY(), -rightStick.getX());
 		
-		if (rightStick.getRawButton(1)) {
-			compressor.start();
-		}
-		
-		if (rightStick.getRawButton(2)) {
-			cylinder.extend();
-		}
-		
-		if (rightStick.getRawButton(4)) {
-			cylinder.retract();
-		}
-		
-		if (rightStick.getRawButton(3)) {
-			compressor.stop();
-		}
 	}
 	
 	
 
 	@Override
 	public void teleopInit() {
-		compressor.stop();
+		
 	}
 
 	/**

@@ -2,9 +2,12 @@ package org.usfirst.frc.team1787.robot;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
+import edu.wpi.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -18,6 +21,10 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 public class Robot extends IterativeRobot {
 
 	private DriveTrain drive;
+	
+	public CameraServer cameraServer;
+	
+	public UsbCamera camera;
 	
 	Joystick rightStick, leftStick;
 	
@@ -35,6 +42,16 @@ public class Robot extends IterativeRobot {
 		//Get joysticks
 		rightStick = new Joystick(0);
 		leftStick = new Joystick(1);
+		
+		//Get the camera server
+		cameraServer = CameraServer.getInstance();
+		
+		//Get the camera
+		camera = new UsbCamera("Camera", 1);
+		camera.setBrightness(50);
+		camera.setExposureAuto();
+		
+		cameraServer.startAutomaticCapture(camera);
 
 		//Done!
 		System.out.println("Robot init :)");
@@ -45,7 +62,8 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopPeriodic() {
-		drive.drive(-rightStick.getY(),rightStick.getX());
+		drive.drive(-rightStick.getY(), rightStick.getX());
+		drive.publishData();
 	}
 	
 	
@@ -65,6 +83,16 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void autonomousInit() {
+		Preferences prefs = Preferences.getInstance();
+		
+		double p = prefs.getDouble("p", 0);
+		double i = prefs.getDouble("i", 0);
+		double d = prefs.getDouble("d", 0);
+		
+		//Set pid args
+		drive.getLeftPID().setPID(p, i, d);
+		drive.getRightPID().setPID(p, i, d);
+		
 		
 	}
 
@@ -73,7 +101,15 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousPeriodic() {
+		drive.publishData();
 		
+		Preferences prefs = Preferences.getInstance();
+		
+		//Get setPoint
+		double setPoint = prefs.getDouble("setPoint", 0);
+		
+		//Drive
+		drive.driveDistance(setPoint);
 	}
 
 	
